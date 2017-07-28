@@ -109,6 +109,12 @@ cc_library_shared {
         },
     },
 
+	product_variables: {
+        treble: {
+            cflags: ["-DFULL_TREBLE"],
+        },
+    },
+	
     srcs: [
         "src/android/android_vendor.c",
     ],
