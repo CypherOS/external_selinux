@@ -53,6 +53,16 @@
 static int __cil_expr_to_bitmap(struct cil_list *expr, ebitmap_t *out, int max, struct cil_db *db);
 static int __cil_expr_list_to_bitmap(struct cil_list *expr_list, ebitmap_t *out, int max, struct cil_db *db);
 
+static int compact(void* array, int count, int len, int (*compar)(const void *, const void *)) {
+	char *a = (char*)array;
+	int j = 0;
+	for(int i=1; i<count; i++) {
+		if(compar(a+i*len, a+j*len) != 0) j++;
+		if(i != j) memcpy(a+j*len, a+i*len, len);
+	}
+	return j;
+}
+
 static int cats_compare(struct cil_cats *a, struct cil_cats *b)
 {
 	struct cil_list_item *i, *j;
@@ -2434,6 +2444,8 @@ static int cil_post_db(struct cil_db *db)
 		cil_log(CIL_ERR, "Problems processing devicetreecon rules\n");
 		goto exit;
 	}
+
+	db->genfscon->count = compact(db->genfscon->array, db->genfscon->count, sizeof(db->genfscon->array), cil_post_genfscon_compare);
 
 exit:
 	return rc;
